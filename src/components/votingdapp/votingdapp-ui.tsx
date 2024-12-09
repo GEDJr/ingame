@@ -54,7 +54,7 @@ export function VotingdappList() {
 }
 
 function VotingdappCard({ account }: { account: PublicKey }) {
-  const { accountQuery, incrementMutation, setMutation, decrementMutation, closeMutation } = useVotingdappProgramAccount({
+  const { accountQuery, incrementMutation, setMutation } = useVotingdappProgramAccount({
     account,
   })
 
@@ -90,30 +90,11 @@ function VotingdappCard({ account }: { account: PublicKey }) {
             >
               Set
             </button>
-            <button
-              className="btn btn-xs lg:btn-md btn-outline"
-              onClick={() => decrementMutation.mutateAsync()}
-              disabled={decrementMutation.isPending}
-            >
-              Decrement
-            </button>
           </div>
           <div className="text-center space-y-4">
             <p>
               <ExplorerLink path={`account/${account}`} label={ellipsify(account.toString())} />
             </p>
-            <button
-              className="btn btn-xs btn-secondary btn-outline"
-              onClick={() => {
-                if (!window.confirm('Are you sure you want to close this account?')) {
-                  return
-                }
-                return closeMutation.mutateAsync()
-              }}
-              disabled={closeMutation.isPending}
-            >
-              Close
-            </button>
           </div>
         </div>
       </div>

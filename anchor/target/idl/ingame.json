@@ -1,0 +1,233 @@
+{
+  "address": "6z8u9qmG1MHT7tngrqRsqKG3z59gsRsp2oa2q1VNBS2f",
+  "metadata": {
+    "name": "ingame",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "join_game",
+      "discriminator": [
+        107,
+        112,
+        18,
+        38,
+        56,
+        173,
+        60,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "joiner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "starter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "game_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "game_id"
+              },
+              {
+                "kind": "arg",
+                "path": "club"
+              },
+              {
+                "kind": "account",
+                "path": "joiner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "game_id",
+          "type": "u8"
+        },
+        {
+          "name": "club",
+          "type": "string"
+        },
+        {
+          "name": "avg_pos",
+          "type": {
+            "array": [
+              {
+                "array": [
+                  "u8",
+                  2
+                ]
+              },
+              1
+            ]
+          }
+        },
+        {
+          "name": "staked_amount",
+          "type": "u8"
+        },
+        {
+          "name": "_starter",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "start_game",
+      "discriminator": [
+        249,
+        47,
+        252,
+        172,
+        184,
+        162,
+        245,
+        14
+      ],
+      "accounts": [
+        {
+          "name": "starter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "game_id"
+              },
+              {
+                "kind": "arg",
+                "path": "club"
+              },
+              {
+                "kind": "account",
+                "path": "starter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "game_id",
+          "type": "u8"
+        },
+        {
+          "name": "club",
+          "type": "string"
+        },
+        {
+          "name": "start_time",
+          "type": "u64"
+        },
+        {
+          "name": "avg_pos",
+          "type": {
+            "array": [
+              {
+                "array": [
+                  "u8",
+                  2
+                ]
+              },
+              1
+            ]
+          }
+        },
+        {
+          "name": "staked_amount",
+          "type": "u8"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Game",
+      "discriminator": [
+        27,
+        90,
+        166,
+        125,
+        74,
+        100,
+        121,
+        18
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "Game",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u8"
+          },
+          {
+            "name": "club",
+            "type": "string"
+          },
+          {
+            "name": "start_time",
+            "type": "u64"
+          },
+          {
+            "name": "win_time",
+            "type": "u64"
+          },
+          {
+            "name": "avg_pos",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    2
+                  ]
+                },
+                1
+              ]
+            }
+          },
+          {
+            "name": "staked_amount",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

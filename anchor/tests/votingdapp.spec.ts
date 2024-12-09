@@ -1,76 +1,49 @@
+import { BankrunProvider, startAnchor } from "anchor-bankrun";
 import * as anchor from '@coral-xyz/anchor'
 import {Program} from '@coral-xyz/anchor'
-import {Keypair} from '@solana/web3.js'
-import {Votingdapp} from '../target/types/votingdapp'
+import {Keypair, PublicKey} from '@solana/web3.js'
+import { Ingame } from '../target/types/ingame';
 
-describe('votingdapp', () => {
-  // Configure the client to use the local cluster.
-  const provider = anchor.AnchorProvider.env()
-  anchor.setProvider(provider)
-  const payer = provider.wallet as anchor.Wallet
+const IDL = require('../target/idl/ingame.json');
 
-  const program = anchor.workspace.Votingdapp as Program<Votingdapp>
+const ingameAddress = new PublicKey("coUnmi3oBUtwtd9fjeAvSsJssXh5A5xyPbhpewyzRVF")
 
-  const votingdappKeypair = Keypair.generate()
+describe('ingame', () => {
+  let context;
+  let provider;
+  let ingameProgram: anchor.Program<Ingame>;
 
-  it('Initialize Votingdapp', async () => {
-    await program.methods
-      .initialize()
-      .accounts({
-        votingdapp: votingdappKeypair.publicKey,
-        payer: payer.publicKey,
-      })
-      .signers([votingdappKeypair])
-      .rpc()
+  beforeAll(async () => {
+    context = await startAnchor("", [{name: "ingame", programId: ingameAddress}], []);
+    provider = new BankrunProvider(context);
 
-    const currentCount = await program.account.votingdapp.fetch(votingdappKeypair.publicKey)
-
-    expect(currentCount.count).toEqual(0)
+    ingameProgram = new Program<Ingame>(
+      IDL,
+      provider,
+    );
   })
 
-  it('Increment Votingdapp', async () => {
-    await program.methods.increment().accounts({ votingdapp: votingdappKeypair.publicKey }).rpc()
+  it('Start Game', async () => {
 
-    const currentCount = await program.account.votingdapp.fetch(votingdappKeypair.publicKey)
+    await ingameProgram.methods.startGame(
+      1,
+      "MU",
+      new anchor.BN(0),
+      [[4,56]],
+      7,
+    ).rpc();
 
-    expect(currentCount.count).toEqual(1)
-  })
+    const [gameAddress] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer, 'le', 1), Buffer.from("MU"), Buffer.alloc(8)],
+      ingameAddress,
+    )
 
-  it('Increment Votingdapp Again', async () => {
-    await program.methods.increment().accounts({ votingdapp: votingdappKeypair.publicKey }).rpc()
+    const game = await ingameProgram.account.game.fetch(gameAddress);
 
-    const currentCount = await program.account.votingdapp.fetch(votingdappKeypair.publicKey)
+    console.log(game);
 
-    expect(currentCount.count).toEqual(2)
-  })
-
-  it('Decrement Votingdapp', async () => {
-    await program.methods.decrement().accounts({ votingdapp: votingdappKeypair.publicKey }).rpc()
-
-    const currentCount = await program.account.votingdapp.fetch(votingdappKeypair.publicKey)
-
-    expect(currentCount.count).toEqual(1)
-  })
-
-  it('Set votingdapp value', async () => {
-    await program.methods.set(42).accounts({ votingdapp: votingdappKeypair.publicKey }).rpc()
-
-    const currentCount = await program.account.votingdapp.fetch(votingdappKeypair.publicKey)
-
-    expect(currentCount.count).toEqual(42)
-  })
-
-  it('Set close the votingdapp account', async () => {
-    await program.methods
-      .close()
-      .accounts({
-        payer: payer.publicKey,
-        votingdapp: votingdappKeypair.publicKey,
-      })
-      .rpc()
-
-    // The account should no longer exist, returning null.
-    const userAccount = await program.account.votingdapp.fetchNullable(votingdappKeypair.publicKey)
-    expect(userAccount).toBeNull()
-  })
-})
+    expect(game.gameId).toEqual(1);
+    expect(game.club).toEqual("MU");
+    expect(game.startTime.toNumber()).toBeLessThan(game.winTime.toNumber());
+  });
+});

@@ -58,23 +58,7 @@ export function useVotingdappProgramAccount({ account }: { account: PublicKey })
     queryFn: () => program.account.votingdapp.fetch(account),
   })
 
-  const closeMutation = useMutation({
-    mutationKey: ['votingdapp', 'close', { cluster, account }],
-    mutationFn: () => program.methods.close().accounts({ votingdapp: account }).rpc(),
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accounts.refetch()
-    },
-  })
 
-  const decrementMutation = useMutation({
-    mutationKey: ['votingdapp', 'decrement', { cluster, account }],
-    mutationFn: () => program.methods.decrement().accounts({ votingdapp: account }).rpc(),
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accountQuery.refetch()
-    },
-  })
 
   const incrementMutation = useMutation({
     mutationKey: ['votingdapp', 'increment', { cluster, account }],
@@ -96,8 +80,6 @@ export function useVotingdappProgramAccount({ account }: { account: PublicKey })
 
   return {
     accountQuery,
-    closeMutation,
-    decrementMutation,
     incrementMutation,
     setMutation,
   }
