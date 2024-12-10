@@ -1,5 +1,5 @@
 {
-  "address": "6z8u9qmG1MHT7tngrqRsqKG3z59gsRsp2oa2q1VNBS2f",
+  "address": "pYGbCyybENYsKbi4TivtrSBCggmjwSh2p2Qso8yatdx",
   "metadata": {
     "name": "ingame",
     "version": "0.1.0",
@@ -7,6 +7,43 @@
     "description": "Created with Anchor"
   },
   "instructions": [
+    {
+      "name": "deploy_game",
+      "discriminator": [
+        105,
+        217,
+        28,
+        20,
+        150,
+        155,
+        121,
+        119
+      ],
+      "accounts": [
+        {
+          "name": "deployer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "deployer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
     {
       "name": "join_game",
       "discriminator": [
@@ -21,12 +58,23 @@
       ],
       "accounts": [
         {
+          "name": "game",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "deployer"
+              }
+            ]
+          }
+        },
+        {
           "name": "joiner",
           "writable": true,
           "signer": true
         },
         {
-          "name": "game",
+          "name": "started_game",
           "pda": {
             "seeds": [
               {
@@ -63,12 +111,8 @@
       ],
       "args": [
         {
-          "name": "game_id",
+          "name": "_game_id",
           "type": "u8"
-        },
-        {
-          "name": "club",
-          "type": "string"
         },
         {
           "name": "avg_pos",
@@ -89,7 +133,7 @@
           "type": "u8"
         },
         {
-          "name": "_starter",
+          "name": "_joiner",
           "type": "pubkey"
         }
       ]
@@ -108,12 +152,23 @@
       ],
       "accounts": [
         {
+          "name": "game",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "deployer"
+              }
+            ]
+          }
+        },
+        {
           "name": "starter",
           "writable": true,
           "signer": true
         },
         {
-          "name": "game",
+          "name": "started_game",
           "writable": true,
           "pda": {
             "seeds": [
@@ -139,10 +194,6 @@
       ],
       "args": [
         {
-          "name": "game_id",
-          "type": "u8"
-        },
-        {
           "name": "club",
           "type": "string"
         },
@@ -167,6 +218,10 @@
         {
           "name": "staked_amount",
           "type": "u8"
+        },
+        {
+          "name": "_starter",
+          "type": "pubkey"
         }
       ]
     }
@@ -184,9 +239,57 @@
         121,
         18
       ]
+    },
+    {
+      "name": "StartedGame",
+      "discriminator": [
+        253,
+        214,
+        99,
+        111,
+        52,
+        253,
+        83,
+        149
+      ]
     }
   ],
   "types": [
+    {
+      "name": "Club",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "club",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ClubMatches",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "club_matches",
+            "type": {
+              "vec": {
+                "array": [
+                  {
+                    "defined": {
+                      "name": "Club"
+                    }
+                  },
+                  2
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "Game",
       "type": {
@@ -194,8 +297,46 @@
         "fields": [
           {
             "name": "game_id",
-            "type": "u8"
+            "type": "u32"
           },
+          {
+            "name": "gamers",
+            "type": {
+              "defined": {
+                "name": "Gamers"
+              }
+            }
+          },
+          {
+            "name": "club_matches",
+            "type": {
+              "defined": {
+                "name": "ClubMatches"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Gamers",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gamers",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "StartedGame",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
             "name": "club",
             "type": "string"

@@ -1,4 +1,4 @@
-# voting-dapp
+# In Game
 
 ## Getting Started
 

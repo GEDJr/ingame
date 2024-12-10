@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/ingame.json`.
  */
 export type Ingame = {
-  "address": "6z8u9qmG1MHT7tngrqRsqKG3z59gsRsp2oa2q1VNBS2f",
+  "address": "pYGbCyybENYsKbi4TivtrSBCggmjwSh2p2Qso8yatdx",
   "metadata": {
     "name": "ingame",
     "version": "0.1.0",
@@ -13,6 +13,43 @@ export type Ingame = {
     "description": "Created with Anchor"
   },
   "instructions": [
+    {
+      "name": "deployGame",
+      "discriminator": [
+        105,
+        217,
+        28,
+        20,
+        150,
+        155,
+        121,
+        119
+      ],
+      "accounts": [
+        {
+          "name": "deployer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "deployer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
     {
       "name": "joinGame",
       "discriminator": [
@@ -27,12 +64,23 @@ export type Ingame = {
       ],
       "accounts": [
         {
+          "name": "game",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "deployer"
+              }
+            ]
+          }
+        },
+        {
           "name": "joiner",
           "writable": true,
           "signer": true
         },
         {
-          "name": "game",
+          "name": "startedGame",
           "pda": {
             "seeds": [
               {
@@ -73,10 +121,6 @@ export type Ingame = {
           "type": "u8"
         },
         {
-          "name": "club",
-          "type": "string"
-        },
-        {
           "name": "avgPos",
           "type": {
             "array": [
@@ -95,7 +139,7 @@ export type Ingame = {
           "type": "u8"
         },
         {
-          "name": "starter",
+          "name": "joiner",
           "type": "pubkey"
         }
       ]
@@ -114,12 +158,23 @@ export type Ingame = {
       ],
       "accounts": [
         {
+          "name": "game",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "deployer"
+              }
+            ]
+          }
+        },
+        {
           "name": "starter",
           "writable": true,
           "signer": true
         },
         {
-          "name": "game",
+          "name": "startedGame",
           "writable": true,
           "pda": {
             "seeds": [
@@ -145,10 +200,6 @@ export type Ingame = {
       ],
       "args": [
         {
-          "name": "gameId",
-          "type": "u8"
-        },
-        {
           "name": "club",
           "type": "string"
         },
@@ -173,6 +224,10 @@ export type Ingame = {
         {
           "name": "stakedAmount",
           "type": "u8"
+        },
+        {
+          "name": "starter",
+          "type": "pubkey"
         }
       ]
     }
@@ -190,9 +245,57 @@ export type Ingame = {
         121,
         18
       ]
+    },
+    {
+      "name": "startedGame",
+      "discriminator": [
+        253,
+        214,
+        99,
+        111,
+        52,
+        253,
+        83,
+        149
+      ]
     }
   ],
   "types": [
+    {
+      "name": "club",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "club",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "clubMatches",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "clubMatches",
+            "type": {
+              "vec": {
+                "array": [
+                  {
+                    "defined": {
+                      "name": "club"
+                    }
+                  },
+                  2
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "game",
       "type": {
@@ -200,8 +303,46 @@ export type Ingame = {
         "fields": [
           {
             "name": "gameId",
-            "type": "u8"
+            "type": "u32"
           },
+          {
+            "name": "gamers",
+            "type": {
+              "defined": {
+                "name": "gamers"
+              }
+            }
+          },
+          {
+            "name": "clubMatches",
+            "type": {
+              "defined": {
+                "name": "clubMatches"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "gamers",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gamers",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "startedGame",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
             "name": "club",
             "type": "string"

@@ -4,17 +4,17 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletButton } from '../solana/solana-provider'
 import { AppHero, ellipsify } from '../ui/ui-layout'
 import { ExplorerLink } from '../cluster/cluster-ui'
-import { useVotingdappProgram } from './votingdapp-data-access'
-import { VotingdappCreate, VotingdappList } from './votingdapp-ui'
+import { useIngameProgram } from './ingame-data-access'
+import { IngameDeploy, IngameList } from './ingame-ui'
 
-export default function VotingdappFeature() {
+export default function IngameFeature() {
   const { publicKey } = useWallet()
-  const { programId } = useVotingdappProgram()
+  const { programId } = useIngameProgram()
 
   return publicKey ? (
     <div>
       <AppHero
-        title="Votingdapp"
+        title="InGame"
         subtitle={
           'Create a new account by clicking the "Create" button. The state of a account is stored on-chain and can be manipulated by calling the program\'s methods (increment, decrement, set, and close).'
         }
@@ -22,9 +22,9 @@ export default function VotingdappFeature() {
         <p className="mb-6">
           <ExplorerLink path={`account/${programId}`} label={ellipsify(programId.toString())} />
         </p>
-        <VotingdappCreate />
+        <IngameDeploy />
       </AppHero>
-      <VotingdappList />
+      <IngameList />
     </div>
   ) : (
     <div className="max-w-4xl mx-auto">

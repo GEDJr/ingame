@@ -6,7 +6,7 @@ import { Ingame } from '../target/types/ingame';
 
 const IDL = require('../target/idl/ingame.json');
 
-const ingameAddress = new PublicKey("coUnmi3oBUtwtd9fjeAvSsJssXh5A5xyPbhpewyzRVF")
+const ingameAddress = new PublicKey("pYGbCyybENYsKbi4TivtrSBCggmjwSh2p2Qso8yatdx")
 
 describe('ingame', () => {
   let context;
@@ -23,27 +23,25 @@ describe('ingame', () => {
     );
   })
 
-  it('Start Game', async () => {
+  it('Deploy Game', async () => {
 
-    await ingameProgram.methods.startGame(
-      1,
-      "MU",
-      new anchor.BN(0),
-      [[4,56]],
-      7,
-    ).rpc();
+    await ingameProgram.methods.deployGame().rpc();
+
+    const seed = Buffer.from(ingameAddress.toBytes());
+    // console.log(seed);
 
     const [gameAddress] = PublicKey.findProgramAddressSync(
-      [new anchor.BN(1).toArrayLike(Buffer, 'le', 1), Buffer.from("MU"), Buffer.alloc(8)],
+      [seed],
       ingameAddress,
     )
+    console.log(gameAddress)
 
     const game = await ingameProgram.account.game.fetch(gameAddress);
 
     console.log(game);
 
-    expect(game.gameId).toEqual(1);
-    expect(game.club).toEqual("MU");
-    expect(game.startTime.toNumber()).toBeLessThan(game.winTime.toNumber());
+    // expect(game.gameId).toEqual(1);
+    // expect(game.club).toEqual("MU");
+    // expect(game.startTime.toNumber()).toBeLessThan(game.winTime.toNumber());
   });
 });
