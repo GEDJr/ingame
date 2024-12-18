@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-ingame = "6z8u9qmG1MHT7tngrqRsqKG3z59gsRsp2oa2q1VNBS2f"
+ingame = "2Vs5S2EyrhhMTqY5NEGzuN4rWXfdoRhJ72oThS2SvfCz"
 
 [registry]
 url = "https://api.apr.dev"

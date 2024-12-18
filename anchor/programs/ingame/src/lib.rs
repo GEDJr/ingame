@@ -2,148 +2,152 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("pYGbCyybENYsKbi4TivtrSBCggmjwSh2p2Qso8yatdx");
+declare_id!("2Vs5S2EyrhhMTqY5NEGzuN4rWXfdoRhJ72oThS2SvfCz");
 
 #[program]
 pub mod ingame {
     use super::*;
 
-    pub fn deploy_game(ctx: Context<DeployGame>) -> Result<()> {
-      let game: &mut Account<'_, Game> = &mut ctx.accounts.game;
-      game.game_id = 1;
-      game.gamers = Gamers { gamers: Vec::new() };
-      game.club_matches = ClubMatches { club_matches: Vec::from([[Club { club: "ManUtd".to_string() }, Club { club: "StockFC".to_string() }]]) }; // Production data has to be scraped
-
-      Ok(())
-    }
-
-    pub fn start_game(ctx: Context<StartGame>, club: String, start_time: u64, avg_pos: [[u8; 2]; 1], staked_amount: u8, _starter: Pubkey) -> Result<()> {
+    pub fn start_game(ctx: Context<StartGame>, club_in_match: ClubInMatch, start_time: u64, ath_avg_pos: Vec<Athlete>, staked_amount: u8, starter: Pubkey) -> Result<()> {
       let started_game: &mut Account<'_, StartedGame> = &mut ctx.accounts.started_game;
-      started_game.club = club;
+      started_game.club_in_match = club_in_match;
       started_game.start_time = start_time; // Later can be retrieved from 'club_matches'
-      started_game.win_time = start_time + (90 + 15 + 25) * 60 * 1000; // 90 mins match, plus 15 half-time break, plus 25 injury time and results retrieval to milisecs
-      started_game.avg_pos = avg_pos;
-      started_game.staked_amount = staked_amount;
+      started_game.win_time = Some(start_time + (90 + 15 + 25) * 60 * 1000); // 90 mins match, plus 15 half-time break, plus 25 injury time and results retrieval to milisecs
+      started_game.ath_avg_pos = ath_avg_pos;
+      started_game.staked_amount = Some(staked_amount);
+      started_game.gamers = Some(1);
+      started_game.total_staked = Some(staked_amount);
+      started_game.starter = starter;
 
-      let game: &mut Account<'_, Game> = &mut ctx.accounts.game;
-      game.game_id += 1;
-
-      msg!("Match: {}", started_game.club);
-      msg!("Match: {}", started_game.win_time);
+      msg!("Initial Stake: {:#?}", started_game.total_staked);
+      msg!("Number of Gamers: {:?}", started_game.gamers);
+      msg!("Starter: {:?}", started_game.starter);
 
       Ok(())
     }
 
-    pub fn join_game(ctx: Context<JoinGame>, _game_id: u8, avg_pos: [[u8; 2]; 1], staked_amount: u8, _joiner: Pubkey) -> Result<()> {
-      let game_counter: &mut Account<'_, StartedGame> = &mut ctx.accounts.game_counter;
-      game_counter.avg_pos = avg_pos;
-      game_counter.staked_amount = staked_amount;
+    pub fn join_game(ctx: Context<JoinGame>, club_in_match: ClubInMatch, join_time: u64, ath_avg_pos: Vec<Athlete>, starter: Pubkey, joiner: Pubkey) -> Result<()> {
+      let joined_game: &mut Account<'_, StartedGame> = &mut ctx.accounts.joined_game;
+      joined_game.club_in_match = club_in_match;
+      joined_game.ath_avg_pos = ath_avg_pos;
+      joined_game.start_time = join_time;
+      joined_game.starter = starter;
+      joined_game.joiner = Some(joiner);
 
-      msg!("Match: {}", game_counter.club);
-      msg!("Match: {}", game_counter.win_time);
+      let started_game: &mut Account<'_, StartedGame> = &mut ctx.accounts.started_game;
+      match started_game.staked_amount {
+          Some(amount) => {
+            if let Some(total) = started_game.total_staked.as_mut() {
+              *total += amount;
+            }
+          },
+          None => (),
+      };
+      if let Some(gamers) = started_game.gamers.as_mut() {
+        *gamers += 1
+      }
+
+      msg!("Current Stake: {:?}", started_game.total_staked);
+      msg!("Number of Gamers: {:?}", started_game.gamers);
+      msg!("Joiner: {:?}", joined_game.joiner);
+      msg!("Starter: {:?}", joined_game.starter);
 
       Ok(())
     }
 
     #[derive(Accounts)]
-    #[instruction(game_id: u8, club: String, starter: Pubkey, deployer: Pubkey)]
+    #[instruction(club_in_match: ClubInMatch, join_time: u64, ath_avg_pos: Vec<Athlete>, starter: Pubkey)]
     pub struct JoinGame<'info> {
-      #[account(
-        seeds = [deployer.as_ref()],
-        bump
-      )]
-      pub game: Account<'info, Game>,
       #[account(mut)]
       pub joiner: Signer<'info>,
       #[account(
-        seeds = [starter.as_ref()],
+        mut,
+        // seeds = [club_in_match.club.as_bytes()],
+        seeds = [club_in_match.club.as_bytes(), starter.key().as_ref()],
         bump
       )]
       pub started_game: Account<'info, StartedGame>,
       #[account(
         init,
         payer = joiner,
-        space = 8 + Game::INIT_SPACE,
-        seeds = [game_id.to_le_bytes().as_ref(), club.as_bytes(), joiner.key().as_ref()],
+        space = 8 + StartedGame::INIT_SPACE,
+        // seeds = [club_in_match.club.as_bytes(), club_in_match.match_.as_bytes()],
+        seeds = [club_in_match.club.as_bytes(), starter.key().as_ref(), joiner.key().as_ref()],
         bump
       )]
-      pub game_counter: Account<'info, StartedGame>, // More like counter attack
+      pub joined_game: Account<'info, StartedGame>, // More like counter attack
       pub system_program: Program<'info, System>
     }
 
     #[derive(Accounts)]
-    #[instruction(game_id: u8, club: String, deployer: Pubkey)]
+    #[instruction(club_in_match: ClubInMatch)]
     pub struct StartGame<'info> {
-      #[account(
-        seeds = [deployer.as_ref()],
-        bump
-      )]
-      pub game: Account<'info, Game>,
       #[account(mut)]
       pub starter: Signer<'info>, // Game starter
       #[account(
         init,
         payer = starter,
         space = 8 + StartedGame::INIT_SPACE,
-        seeds = [game_id.to_le_bytes().as_ref(), club.as_bytes(), starter.key().as_ref()],
+        // seeds = [club_in_match.club.as_bytes()],
+        seeds = [club_in_match.club.as_bytes(), starter.key().as_ref()],
         bump
       )]
       pub started_game: Account<'info, StartedGame>,
       pub system_program: Program<'info, System>
     }
 
-    #[derive(Accounts)]
-    pub struct DeployGame<'info> {
-      #[account(mut)]
-      pub deployer: Signer<'info>, // Game deployer
-      #[account(
-        init,
-        payer = deployer,
-        space = 8 + Game::INIT_SPACE,
-        seeds = [deployer.key().as_ref()],
-        bump
-      )]
-      pub game: Account<'info, Game>,
-      pub system_program: Program<'info, System>
-    }
-
     #[account]
     #[derive(InitSpace)]
-    pub struct Game {
-      pub game_id: u32,
-      pub gamers: Gamers,
-      pub club_matches: ClubMatches,
-    }
-
-    #[account]
-    #[derive(InitSpace)]
-    pub struct Gamers {
-      #[max_len(5)] // For test
-      gamers: Vec<Pubkey>,
-    }
-
-    #[account]
-    #[derive(InitSpace)]
-    pub struct ClubMatches {
-      #[max_len(5)]
-      club_matches: Vec<[Club; 2]>,
-    }
-
-    #[account]
-    #[derive(InitSpace)]
-    pub struct Club {
+    pub struct StringHandler {
       #[max_len(10)]
-      club: String,
+      string_handler: String,
     }
+
+    // #[account]
+    // #[derive(InitSpace)]
+    // pub struct JoinedGame {
+    //   #[max_len(230)]
+    //   pub ath_avg_pos: Vec<Athlete>,
+    //   pub join_time: u64
+    // }
 
     #[account]
     #[derive(InitSpace)]
     pub struct StartedGame {
-      #[max_len(10)]
-      pub club: String,
+      pub club_in_match: ClubInMatch,
       pub start_time: u64,
-      pub win_time: u64,
-      pub avg_pos: [[u8; 2]; 1], // Just for simplicity, accual is atleat 19 players on matchday squad
-      pub staked_amount: u8
+      pub win_time: Option<u64>,
+      #[max_len(230)] // Investigate this space, 23 can accept only 2 athletes, Why?
+      pub ath_avg_pos: Vec<Athlete>, // Just for simplicity, accual is atleat 19 players on matchday squad
+      pub staked_amount: Option<u8>,
+      pub total_staked: Option<u8>,
+      pub gamers: Option<u8>,
+      pub starter: Pubkey,
+      pub joiner: Option<Pubkey>
     }
+
+    #[account]
+    #[derive(InitSpace)]
+    pub struct Athlete {
+      #[max_len(10)]
+      name: String, 
+      number: u8, 
+      avg_pos: [u16; 2],
+    }
+
+    #[account]
+    #[derive(InitSpace)]
+    pub struct ClubInMatch {
+      #[max_len(10)]
+      club: String,
+      #[max_len(20)]
+      match_: String
+    }
+
+  //   #[account]
+  //   #[derive(InitSpace)]
+  //   pub struct Seeder {
+  //     club: String;
+  //     starter: PublicKey;
+  // };
 }

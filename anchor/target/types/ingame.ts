@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/ingame.json`.
  */
 export type Ingame = {
-  "address": "pYGbCyybENYsKbi4TivtrSBCggmjwSh2p2Qso8yatdx",
+  "address": "2Vs5S2EyrhhMTqY5NEGzuN4rWXfdoRhJ72oThS2SvfCz",
   "metadata": {
     "name": "ingame",
     "version": "0.1.0",
@@ -13,43 +13,6 @@ export type Ingame = {
     "description": "Created with Anchor"
   },
   "instructions": [
-    {
-      "name": "deployGame",
-      "discriminator": [
-        105,
-        217,
-        28,
-        20,
-        150,
-        155,
-        121,
-        119
-      ],
-      "accounts": [
-        {
-          "name": "deployer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "game",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "deployer"
-              }
-            ]
-          }
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": []
-    },
     {
       "name": "joinGame",
       "discriminator": [
@@ -64,25 +27,19 @@ export type Ingame = {
       ],
       "accounts": [
         {
-          "name": "game",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "arg",
-                "path": "deployer"
-              }
-            ]
-          }
-        },
-        {
           "name": "joiner",
           "writable": true,
           "signer": true
         },
         {
           "name": "startedGame",
+          "writable": true,
           "pda": {
             "seeds": [
+              {
+                "kind": "arg",
+                "path": "club_in_match.club"
+              },
               {
                 "kind": "arg",
                 "path": "starter"
@@ -91,17 +48,17 @@ export type Ingame = {
           }
         },
         {
-          "name": "gameCounter",
+          "name": "joinedGame",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "arg",
-                "path": "gameId"
+                "path": "club_in_match.club"
               },
               {
                 "kind": "arg",
-                "path": "club"
+                "path": "starter"
               },
               {
                 "kind": "account",
@@ -117,26 +74,30 @@ export type Ingame = {
       ],
       "args": [
         {
-          "name": "gameId",
-          "type": "u8"
-        },
-        {
-          "name": "avgPos",
+          "name": "clubInMatch",
           "type": {
-            "array": [
-              {
-                "array": [
-                  "u8",
-                  2
-                ]
-              },
-              1
-            ]
+            "defined": {
+              "name": "clubInMatch"
+            }
           }
         },
         {
-          "name": "stakedAmount",
-          "type": "u8"
+          "name": "joinTime",
+          "type": "u64"
+        },
+        {
+          "name": "athAvgPos",
+          "type": {
+            "vec": {
+              "defined": {
+                "name": "athlete"
+              }
+            }
+          }
+        },
+        {
+          "name": "starter",
+          "type": "pubkey"
         },
         {
           "name": "joiner",
@@ -158,17 +119,6 @@ export type Ingame = {
       ],
       "accounts": [
         {
-          "name": "game",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "arg",
-                "path": "deployer"
-              }
-            ]
-          }
-        },
-        {
           "name": "starter",
           "writable": true,
           "signer": true
@@ -180,11 +130,7 @@ export type Ingame = {
             "seeds": [
               {
                 "kind": "arg",
-                "path": "gameId"
-              },
-              {
-                "kind": "arg",
-                "path": "club"
+                "path": "club_in_match.club"
               },
               {
                 "kind": "account",
@@ -200,25 +146,25 @@ export type Ingame = {
       ],
       "args": [
         {
-          "name": "club",
-          "type": "string"
+          "name": "clubInMatch",
+          "type": {
+            "defined": {
+              "name": "clubInMatch"
+            }
+          }
         },
         {
           "name": "startTime",
           "type": "u64"
         },
         {
-          "name": "avgPos",
+          "name": "athAvgPos",
           "type": {
-            "array": [
-              {
-                "array": [
-                  "u8",
-                  2
-                ]
-              },
-              1
-            ]
+            "vec": {
+              "defined": {
+                "name": "athlete"
+              }
+            }
           }
         },
         {
@@ -233,19 +179,6 @@ export type Ingame = {
     }
   ],
   "accounts": [
-    {
-      "name": "game",
-      "discriminator": [
-        27,
-        90,
-        166,
-        125,
-        74,
-        100,
-        121,
-        18
-      ]
-    },
     {
       "name": "startedGame",
       "discriminator": [
@@ -262,78 +195,42 @@ export type Ingame = {
   ],
   "types": [
     {
-      "name": "club",
+      "name": "athlete",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "number",
+            "type": "u8"
+          },
+          {
+            "name": "avgPos",
+            "type": {
+              "array": [
+                "u16",
+                2
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "clubInMatch",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "club",
             "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "clubMatches",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "clubMatches",
-            "type": {
-              "vec": {
-                "array": [
-                  {
-                    "defined": {
-                      "name": "club"
-                    }
-                  },
-                  2
-                ]
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "game",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "gameId",
-            "type": "u32"
           },
           {
-            "name": "gamers",
-            "type": {
-              "defined": {
-                "name": "gamers"
-              }
-            }
-          },
-          {
-            "name": "clubMatches",
-            "type": {
-              "defined": {
-                "name": "clubMatches"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "gamers",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "gamers",
-            "type": {
-              "vec": "pubkey"
-            }
+            "name": "match",
+            "type": "string"
           }
         ]
       }
@@ -344,8 +241,12 @@ export type Ingame = {
         "kind": "struct",
         "fields": [
           {
-            "name": "club",
-            "type": "string"
+            "name": "clubInMatch",
+            "type": {
+              "defined": {
+                "name": "clubInMatch"
+              }
+            }
           },
           {
             "name": "startTime",
@@ -353,25 +254,47 @@ export type Ingame = {
           },
           {
             "name": "winTime",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
-            "name": "avgPos",
+            "name": "athAvgPos",
             "type": {
-              "array": [
-                {
-                  "array": [
-                    "u8",
-                    2
-                  ]
-                },
-                1
-              ]
+              "vec": {
+                "defined": {
+                  "name": "athlete"
+                }
+              }
             }
           },
           {
             "name": "stakedAmount",
-            "type": "u8"
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "totalStaked",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "gamers",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "starter",
+            "type": "pubkey"
+          },
+          {
+            "name": "joiner",
+            "type": {
+              "option": "pubkey"
+            }
           }
         ]
       }

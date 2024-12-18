@@ -21,7 +21,7 @@ export function getIngameProgramId(cluster: Cluster) {
     case 'devnet':
     case 'testnet':
       // This is the program ID for the Ingame program on devnet and testnet.
-      return new PublicKey('pYGbCyybENYsKbi4TivtrSBCggmjwSh2p2Qso8yatdx')
+      return new PublicKey('2Vs5S2EyrhhMTqY5NEGzuN4rWXfdoRhJ72oThS2SvfCz')
     case 'mainnet-beta':
     default:
       return INGAME_PROGRAM_ID

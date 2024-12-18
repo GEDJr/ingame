@@ -12,19 +12,32 @@ import { useTransactionToast } from '../ui/ui-layout'
 import { BN } from '@coral-xyz/anchor'
 
 interface StartGameArgs {
-  club:string;
+  clubInMatch: ClubInMAtch;
   startTime: BN;
-  avgPos: [number, number][];
-  stakedAmount: number;
+  athAvgPos: AthAvgPosAgs[];
+  stakedAmount?: number;
   starter: PublicKey;
-}
-
-interface JoinGameArgs {
-  gameId: number;
-  avgPos: [number, number][];
-  stakedAmount: number;
   joiner: PublicKey;
 }
+
+interface ClubInMAtch {
+  club: string;
+  match: string;
+}
+
+interface AthAvgPosAgs {
+  name: string;
+  number: number;
+  avgPos: [number, number]
+}
+
+// interface JoinGameArgs {
+//   clubInMatch: ClubInMAtch;
+//   joinTime: BN;
+//   athAvgPos: AthAvgPosAgs[];
+//   starter: PublicKey;
+//   joiner: PublicKey;
+// }
 
 export function useIngameProgram() {
   const { connection } = useConnection()
@@ -36,18 +49,23 @@ export function useIngameProgram() {
 
   const accounts = useQuery({
     queryKey: ['ingame', 'all', { cluster }],
-    queryFn: () => program.account.game.all(),
+    queryFn: () => program.account.startedGame.all(),
   })
+
+  // const join_accounts = useQuery({
+  //   queryKey: ['ingame', 'all', { cluster }],
+  //   queryFn: () => program.account.joinedGame.all(),
+  // })
 
   const getProgramAccount = useQuery({
     queryKey: ['get-program-account', { cluster }],
     queryFn: () => connection.getParsedAccountInfo(programId),
   })
 
-  const deployGame = useMutation<string, Error> ({
-    mutationKey: [ `game`,  `deploy`, { cluster }],
-    mutationFn: async () => {
-      return program.methods.deployGame().rpc()
+  const startGame = useMutation<string, Error, StartGameArgs> ({
+    mutationKey: [ `game`,  `start`, { cluster }],
+    mutationFn: async ({ clubInMatch, startTime, athAvgPos, stakedAmount, starter }) => {
+      return program.methods.startGame( clubInMatch, startTime, athAvgPos, stakedAmount ?? 0, starter ).rpc()
     },
     onSuccess: (signature) => {
       transactionToast(signature);
@@ -62,8 +80,9 @@ export function useIngameProgram() {
     program,
     accounts,
     getProgramAccount,
-    deployGame,
+    startGame,
     programId,
+    // join_accounts
   };
 }
 
@@ -74,27 +93,13 @@ export function useIngameProgramAccount({ account }: { account: PublicKey }) {
 
   const accountQuery = useQuery({
     queryKey: ['ingame', 'fetch', { cluster, account }],
-    queryFn: () => program.account.game.fetch(account),
+    queryFn: () => program.account.startedGame.fetch(account),
   })
-
-  const startGame = useMutation<string, Error, StartGameArgs> ({
-    mutationKey: [ `game`,  `start`, { cluster }],
-    mutationFn: async ({ club, startTime, avgPos, stakedAmount, starter }) => {
-      return program.methods.startGame( club, startTime, avgPos, stakedAmount, starter ).rpc()
-    },
-    onSuccess: (signature) => {
-      transactionToast(signature);
-      accounts.refetch();
-    },
-    onError: (error) => {
-      toast.error(`Error starting game: ${error.message}`);
-    },
-  });
-
-  const joinGame = useMutation<string, Error, JoinGameArgs> ({
+  
+  const joinGame = useMutation<string, Error, StartGameArgs> ({
     mutationKey: [ `game`,  `join`, { cluster }],
-    mutationFn: async ({ gameId, avgPos, stakedAmount, joiner }) => {
-      return program.methods.joinGame( gameId, avgPos, stakedAmount, joiner ).rpc()
+    mutationFn: async ({ clubInMatch, startTime, athAvgPos, starter, joiner }) => {
+      return program.methods.joinGame( clubInMatch, startTime, athAvgPos, starter, joiner ?? starter ).rpc()
     },
     onSuccess: (signature) => {
       transactionToast(signature);
@@ -107,7 +112,6 @@ export function useIngameProgramAccount({ account }: { account: PublicKey }) {
 
   return {
     accountQuery,
-    startGame,
     joinGame,
   };
 }

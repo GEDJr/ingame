@@ -5,7 +5,7 @@ import { WalletButton } from '../solana/solana-provider'
 import { AppHero, ellipsify } from '../ui/ui-layout'
 import { ExplorerLink } from '../cluster/cluster-ui'
 import { useIngameProgram } from './ingame-data-access'
-import { IngameDeploy, IngameList } from './ingame-ui'
+import { IngameStart, IngameList } from './ingame-ui'
 
 export default function IngameFeature() {
   const { publicKey } = useWallet()
@@ -22,7 +22,7 @@ export default function IngameFeature() {
         <p className="mb-6">
           <ExplorerLink path={`account/${programId}`} label={ellipsify(programId.toString())} />
         </p>
-        <IngameDeploy />
+        <IngameStart />
       </AppHero>
       <IngameList />
     </div>
