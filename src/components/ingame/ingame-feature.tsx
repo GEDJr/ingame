@@ -3,7 +3,7 @@
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletButton } from '../solana/solana-provider'
 import { AppHero, ellipsify } from '../ui/ui-layout'
-import { ExplorerLink } from '../cluster/cluster-ui'
+// import { ExplorerLink } from '../cluster/cluster-ui'
 import { useIngameProgram } from './ingame-data-access'
 import { IngameStart, IngameList } from './ingame-ui'
 
@@ -15,13 +15,11 @@ export default function IngameFeature() {
     <div>
       <AppHero
         title="InGame"
-        subtitle={
-          'Create a new account by clicking the "Create" button. The state of a account is stored on-chain and can be manipulated by calling the program\'s methods (increment, decrement, set, and close).'
-        }
+        subtitle={""}
       >
-        <p className="mb-6">
+        {/* <p className="mb-6">
           <ExplorerLink path={`account/${programId}`} label={ellipsify(programId.toString())} />
-        </p>
+        </p> */}
         <IngameStart />
       </AppHero>
       <IngameList />

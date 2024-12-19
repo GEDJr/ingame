@@ -1,12 +1,10 @@
 'use client'
 
-import { Keypair, PublicKey } from '@solana/web3.js'
-import { ellipsify } from '../ui/ui-layout'
-import { ExplorerLink } from '../cluster/cluster-ui'
+import { PublicKey } from '@solana/web3.js'
 import { useIngameProgram, useIngameProgramAccount } from './ingame-data-access'
-import { SetStateAction, useState } from 'react'
+import { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { BN, ProgramAccount } from '@coral-xyz/anchor'
+import { BN } from '@coral-xyz/anchor'
 
 export function IngameStart() {
   const { publicKey } = useWallet();
@@ -51,7 +49,7 @@ export function IngameStart() {
 
   const [clubInMatch, setClubInMatch] = useState<ClubInMAtch | null>(null);
   const athletesOnPitch = athletes.filter((athlete) => athlete.onPitch).length;
-  const isFormValid = athletesOnPitch < 1 || stakedAmount < fees || clubInMatch === null;
+  const isFormValid = athletesOnPitch < 11 || stakedAmount < fees || clubInMatch === null;
   const [selectedAthleteId, setSelectedAthleteId] = useState<number | null>(null);
   
   const handleAthleteClick = (number: number ) => {
@@ -231,7 +229,6 @@ export function IngameList() {
       groupedAccounts[seeder] = [];
     }
     groupedAccounts[seeder].push({ account: account.account, publicKey: account.publicKey });
-    // groupedAccounts[seeder].reverse()
   });
 
   return (
@@ -302,7 +299,7 @@ function ImageCrd({ account }: { account: PublicKey }) {
   );
 
   const athletesOnPitch = athletes.filter((athlete) => athlete.onPitch).length;
-  const isFormValid = athletesOnPitch < 1 || clubInMatch === null || startTime === undefined || starter === undefined;
+  const isFormValid = athletesOnPitch < 11 || clubInMatch === null || startTime === undefined || starter === undefined;
 
   const [selectedAthleteId, setSelectedAthleteId] = useState<number | null>(null);
   
@@ -326,10 +323,6 @@ function ImageCrd({ account }: { account: PublicKey }) {
     );
     setSelectedAthleteId(null)
   };
-
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, number: number) => {
-    setSelectedAthleteId(number)
-  }
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -368,7 +361,6 @@ function ImageCrd({ account }: { account: PublicKey }) {
           )
         }
       }
-
       )
       
       joinGame.mutateAsync({
@@ -420,14 +412,11 @@ function ImageCrd({ account }: { account: PublicKey }) {
           <div className='absolute top-1/2 left-1/2 w-20 h-20 border-2 border-white rounded-full -translate-x-1/2 -translate-y-1/2'></div>
           <div className='absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full -translate-x-1/2 -translate-y-1/2'></div>
             {accountQuery.data?.athAvgPos
-              // .filter(athlete => athlete.onPitch)
               .map(athlete => (
                 <div
                   key={athlete.number}
                   className='w-8 h-8 bg-yellow-500 round-full text-white font-bold flex items-center justify-center absolute'
                   style={{ left: athlete.avgPos[0], top: athlete.avgPos[1] }}
-                  // draggable
-                  // onDragStart={(e) => handleDragStart(e, athlete.number)}
                 >
                   {athlete.number}
                 </div>
@@ -440,8 +429,6 @@ function ImageCrd({ account }: { account: PublicKey }) {
                   key={athlete.number}
                   className='w-8 h-8 bg-red-500 round-full text-white font-bold flex items-center justify-center absolute'
                   style={{ left: athlete.x, top: athlete.y }}
-                  // draggable
-                  // onDragStart={(e) => handleDragStart(e, athlete.number)}
                 >
                   {athlete.number}
                 </div>
@@ -449,9 +436,6 @@ function ImageCrd({ account }: { account: PublicKey }) {
             }
           </div>
         </div>
-          {/* <p className='mt-4 text-lg'>Athletes on the pitch: {athletesOnPitch}/16</p> */}
-          {/* </div> */}
-        {/* </div> */}
         <button
           onClick={handleSubmit}
           disabled={joinGame.isPending || isFormValid}
@@ -477,14 +461,11 @@ function ImageCrd({ account }: { account: PublicKey }) {
           <div className='absolute top-1/2 left-1/2 w-20 h-20 border-2 border-white rounded-full -translate-x-1/2 -translate-y-1/2'></div>
           <div className='absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full -translate-x-1/2 -translate-y-1/2'></div>
             {accountQuery.data?.athAvgPos
-              // .filter(athlete => athlete.onPitch)
               .map(athlete => (
                 <div
                   key={athlete.number}
                   className='w-8 h-8 bg-yellow-500 round-full text-white font-bold flex items-center justify-center absolute'
                   style={{ left: athlete.avgPos[0], top: athlete.avgPos[1] }}
-                  // draggable
-                  // onDragStart={(e) => handleDragStart(e, athlete.number)}
                 >
                   {athlete.number}
                 </div>
@@ -497,8 +478,6 @@ function ImageCrd({ account }: { account: PublicKey }) {
                   key={athlete.number}
                   className='w-8 h-8 bg-red-500 round-full text-white font-bold flex items-center justify-center absolute'
                   style={{ left: athlete.x, top: athlete.y }}
-                  // draggable
-                  // onDragStart={(e) => handleDragStart(e, athlete.number)}
                 >
                   {athlete.number}
                 </div>
@@ -506,9 +485,6 @@ function ImageCrd({ account }: { account: PublicKey }) {
             }
           </div>
         </div>
-          {/* <p className='mt-4 text-lg'>Athletes on the pitch: {athletesOnPitch}/16</p> */}
-          {/* </div> */}
-        {/* </div> */}
       </div>
     )}
   </>)

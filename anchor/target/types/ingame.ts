@@ -48,6 +48,33 @@ export type Ingame = {
           }
         },
         {
+          "name": "burser",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  114,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "club_in_match.club"
+              },
+              {
+                "kind": "arg",
+                "path": "starter"
+              }
+            ]
+          }
+        },
+        {
           "name": "joinedGame",
           "writable": true,
           "pda": {
@@ -140,6 +167,33 @@ export type Ingame = {
           }
         },
         {
+          "name": "burser",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  114,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "club_in_match.club"
+              },
+              {
+                "kind": "account",
+                "path": "starter"
+              }
+            ]
+          }
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
@@ -180,6 +234,19 @@ export type Ingame = {
   ],
   "accounts": [
     {
+      "name": "burser",
+      "discriminator": [
+        45,
+        65,
+        228,
+        164,
+        177,
+        144,
+        131,
+        124
+      ]
+    },
+    {
       "name": "startedGame",
       "discriminator": [
         253,
@@ -191,6 +258,13 @@ export type Ingame = {
         83,
         149
       ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "wrongTiming",
+      "msg": "Wrong Timing"
     }
   ],
   "types": [
@@ -220,6 +294,26 @@ export type Ingame = {
       }
     },
     {
+      "name": "burser",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "winner",
+            "type": "pubkey"
+          },
+          {
+            "name": "winnerChosen",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "clubInMatch",
       "type": {
         "kind": "struct",
@@ -240,6 +334,10 @@ export type Ingame = {
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
           {
             "name": "clubInMatch",
             "type": {

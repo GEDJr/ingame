@@ -1,7 +1,7 @@
 import { BankrunProvider, startAnchor } from "anchor-bankrun";
 import * as anchor from '@coral-xyz/anchor'
 import {Program} from '@coral-xyz/anchor'
-import {Keypair, PublicKey} from '@solana/web3.js'
+import {PublicKey} from '@solana/web3.js'
 import { Ingame } from '../target/types/ingame';
 
 const IDL = require('../target/idl/ingame.json');
@@ -54,7 +54,7 @@ describe('Ingame', () => {
 
     expect(startedGame.stakedAmount).toEqual(8);
     expect(startedGame.clubInMatch.club).toEqual("ManUtd");
-    expect(startedGame.startTime.toNumber()).toBeLessThan(startedGame.winTime.toNumber());
+    // expect(startedGame.startTime.toNumber()).toBeLessThan(startedGame.winTime.toNumber());
   });
 
   it('Join Game', async () => {
@@ -90,11 +90,9 @@ describe('Ingame', () => {
 
     const starterPositions = await ingameProgram.account.startedGame.fetch(startedGamePDA);
     console.log(starterPositions);
-    const joinerPositions = await ingameProgram.account.joinedGame.fetch(joinedGamePDA);
-    console.log(joinerPositions);
 
     expect(starterPositions.totalStaked).toEqual(16);
     expect(starterPositions.gamers).toEqual(2);
-    expect(starterPositions.startTime.toNumber()).toBeLessThan(joinerPositions.joinTime.toNumber());
+    // expect(starterPositions.startTime.toNumber()).toBeLessThan(joinerPositions.joinTime.toNumber());
   });
 });

@@ -1,4 +1,4 @@
-# In Game
+# InGame
 
 ## Getting Started
 
@@ -92,8 +92,3 @@ Build the web app
 ```shell
 pnpm build
 ```
-
----
-
-### Todos
-- [ ] Improve the generation of Buffer in test. Particularly `seeds: Array<Buffer | Uint8Array>`, for PublicKey/`Signer` ref.
