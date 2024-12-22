@@ -1,4 +1,5 @@
 # InGame
+![alt text](https://github.com/GEDJr/ingame/blob/main/cover.webp?raw=true)
 
 ## Getting Started
 
